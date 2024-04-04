@@ -1,73 +1,62 @@
-from collections import defaultdict
 class TrieNode:
     def __init__(self):
-        self.data = defaultdict(int)
+        self.words_starting_here = 0
+        self.words_ending_here = 0
         self.children = {}
+
 class Trie:
     def __init__(self):
         self.root = TrieNode()
-    
-    def insertHelper(self, word, index, root):
-        if index >= len(word):
-            return
 
-        char = word[index]
-        
-        if char not in root.children:
-            root.children[char] = TrieNode()
-        
-        root.children[char].data[word] += 1
-        self.insertHelper(word, index + 1, root.children[char])
+    def insert(self, word: str) -> None:
+        curr_node = self.root
 
-    def insert(self, word):
-        self.insertHelper(word, 0, self.root)
+        for char in word:
+            if char not in curr_node.children:
+                curr_node.children[char] = TrieNode()
+            
+            curr_node = curr_node.children[char]
+            curr_node.words_starting_here += 1
         
-    def find(self, word, index, root):
-        if index >= len(word):
-            return root.data
-        
-        char = word[index]
+        curr_node.words_ending_here += 1
 
-        if char not in root.children:
-            return {}
-        
-        return self.find(word, index + 1, root.children[char])
+    def find(self, word):
+        curr_node = self.root
 
-    def countWordsEqualTo(self, word):
-        ret =  self.find(word, 0, self.root)
-        return ret[word] if word in ret else 0
+        for char in word:
+            if char not in curr_node.children:
+                return {}
+            
+            curr_node = curr_node.children[char]
         
-    def countWordsStartingWith(self, prefix):
-        ret = self.find(prefix, 0, self.root)
-        return sum(ret.values())
-        
-    def eraseHelper(self, word, index, root):
-        if index >= len(word):
-            return True
-        
-        char = word[index]
+        return curr_node
 
-        if char not in root.children:
-            return False
-    
-        should_delete = self.eraseHelper(word, index + 1, root.children[char])
+    def countWordsEqualTo(self, word: str) -> int:
+        ret = self.find(word)
 
-        if not should_delete:
-            return False
+        if not ret:
+            return 0
         
-        root.children[char].data[word] -= 1
-        
-        if root.children[char].data[word] == 0:
-            del root.children[char].data[word]
-        
-        if len(root.children[char].data) == 0:
-            del root.children[char]
+        return ret.words_ending_here  
 
-        return True
+    def countWordsStartingWith(self, prefix: str) -> int:
+        ret = self.find(prefix)
 
-    def erase(self, word):
-        self.eraseHelper(word, 0, self.root)
+        if not ret:
+            return 0
         
+        return ret.words_starting_here
+        
+    def erase(self, word: str) -> None:
+        curr_node = self.root
+
+        for char in word:
+            curr_node = curr_node.children[char]
+            curr_node.words_starting_here -= 1
+        
+        curr_node.words_ending_here -= 1
+        
+
 
 # Your Trie object will be instantiated and called as such:
 # obj = Trie()
