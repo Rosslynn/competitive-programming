@@ -30,7 +30,7 @@
       for (let i = n; i < obj2.length; i++) {
           ret[i] = obj2[i];
       }
-  } else if (obj1 && obj2 && typeof obj1 === 'object' && typeof obj2 === 'object') {
+  } else {
       ret = {};
 
       for (const key in obj2) {
